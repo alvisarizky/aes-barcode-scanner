@@ -4,14 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:aes_barcode_scanner/src/config/themes/color.theme.dart';
 import 'package:aes_barcode_scanner/src/config/themes/typography.theme.dart';
 import 'package:aes_barcode_scanner/src/core/helpers/validate_qr_code_data.helper.dart';
-import 'package:aes_barcode_scanner/src/core/utils/date_time.util.dart';
 import 'package:aes_barcode_scanner/src/core/widgets/app_header.widget.dart';
 import 'package:aes_barcode_scanner/src/core/widgets/app_modal.widget.dart';
 import 'package:aes_barcode_scanner/src/core/widgets/badge.widget.dart';
 import 'package:aes_barcode_scanner/src/core/widgets/button.widget.dart';
 import 'package:aes_barcode_scanner/src/core/widgets/list_view.widget.dart';
 import 'package:aes_barcode_scanner/src/core/widgets/scaffold.widget.dart';
-import 'package:skeletonizer/skeletonizer.dart';
 
 class ScannerResultPage extends ConsumerStatefulWidget {
   static const routeName = '/scanner-result';
@@ -26,6 +24,7 @@ class ScannerResultPage extends ConsumerStatefulWidget {
 
 class _ScannerResultPageState extends ConsumerState<ScannerResultPage> {
   bool isValid = true;
+  List<Map<String, dynamic>>? _resultObject;
 
   @override
   void initState() {
@@ -34,8 +33,7 @@ class _ScannerResultPageState extends ConsumerState<ScannerResultPage> {
   }
 
   Future<void> _validateBarcodeData() async {
-    if (ValidateQrCodeDataHelper.extractQrCodeId(widget.barcodeData) == null ||
-        ValidateQrCodeDataHelper.extractQrCodeId(widget.barcodeData) == '') {
+    if (ValidateQrCodeDataHelper.extractQrCode(widget.barcodeData) == null) {
       setState(() => isValid = !isValid);
       Future.delayed(
         const Duration(seconds: 2),
@@ -58,6 +56,16 @@ class _ScannerResultPageState extends ConsumerState<ScannerResultPage> {
           ],
         ),
       );
+    } else {
+      Map<String, dynamic> barcodeDecode =
+          ValidateQrCodeDataHelper.extractQrCode(widget.barcodeData) ?? {};
+      List<Map<String, dynamic>> result = [];
+
+      for (var element in barcodeDecode.entries) {
+        result.add({"title": element.key, "value": element.value.toString()});
+      }
+
+      setState(() => _resultObject = result);
     }
   }
 
@@ -108,6 +116,7 @@ class _ScannerResultPageState extends ConsumerState<ScannerResultPage> {
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 8,
                     children: [
                       Row(
                         children: [
@@ -131,51 +140,19 @@ class _ScannerResultPageState extends ConsumerState<ScannerResultPage> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 24),
-                      Text(
-                        'NRPP : -',
-                        style: BsTypographyTheme.bodySmall(
-                          context,
-                          color: BsColorTheme.neutral.shade600,
+                      const SizedBox(height: 8),
+                      if (_resultObject != null ||
+                          (_resultObject ?? []).isNotEmpty)
+                        ...List.generate(
+                          _resultObject?.length ?? 0,
+                          (index) => Text(
+                            '${_resultObject?[index]['title'] ?? '-'} : ${_resultObject?[index]['value'] ?? '-'}',
+                            style: BsTypographyTheme.bodySmall(
+                              context,
+                              color: BsColorTheme.neutral.shade600,
+                            ),
+                          ),
                         ),
-                      ),
-                      Text(
-                        'Nama : -',
-                        style: BsTypographyTheme.bodySmall(
-                          context,
-                          color: BsColorTheme.neutral.shade600,
-                        ),
-                      ),
-                      Text(
-                        'Jabatan : -',
-                        style: BsTypographyTheme.bodySmall(
-                          context,
-                          color: BsColorTheme.neutral.shade600,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Nomor Surat : -',
-                        style: BsTypographyTheme.bodySmall(
-                          context,
-                          color: BsColorTheme.neutral.shade600,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Tanggal Permohonan : ${DateTimeUtil.convertDate()}',
-                        style: BsTypographyTheme.bodySmall(
-                          context,
-                          color: BsColorTheme.neutral.shade600,
-                        ),
-                      ),
-                      Text(
-                        'Tanggal Persetujuan : ${DateTimeUtil.convertDate()}',
-                        style: BsTypographyTheme.bodySmall(
-                          context,
-                          color: BsColorTheme.neutral.shade600,
-                        ),
-                      ),
                     ],
                   ),
                 ),

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:aes_barcode_scanner/src/core/const/constants.dart';
 import 'package:aes_barcode_scanner/src/core/utils/crypto.util.dart';
 import 'package:flutter/material.dart';
 
@@ -8,54 +9,21 @@ class ValidateQrCodeDataHelper {
     String? result;
 
     if (data != null) {
-      Map<String, dynamic> jsonData = jsonDecode(
-          CryptoUtil(secretKey: 'rahasia', secretIv: 'iv_rahasia')
-              .decryptData(data));
+      String decodeData = CryptoUtil(
+        secretKey: Secret.secretKey,
+        secretIv: Secret.secretIv,
+      ).decryptData(data);
+
+      if (decodeData.isEmpty) {
+        return 'Barcode Data tidak valid!';
+      }
+
+      Map<String, dynamic> jsonData = jsonDecode(decodeData);
       debugPrint('JSON DATA: $jsonData');
-
-      if (jsonData['KATEGORI'] == null) {
-        result = 'KATEGORI : ${jsonData['KATEGORI']}';
-      }
-
-      if (jsonData['ID'] == null) {
-        result = '${result != null ? ', ' : ''}ID : ${jsonData['ID']}';
-      }
 
       return result;
     } else {
       result = 'Barcode Data tidak ditemukan!';
-    }
-
-    return result;
-  }
-
-  static String extractQrCodeCategory(String? data) {
-    String result = '';
-
-    if (data != null) {
-      Map<String, dynamic> jsonData = jsonDecode(
-          CryptoUtil(secretKey: 'rahasia', secretIv: 'iv_rahasia')
-              .decryptData(data));
-
-      if (jsonData['KATEGORI'] != null) {
-        result = jsonData['KATEGORI'];
-      }
-    }
-
-    return result;
-  }
-
-  static String? extractQrCodeId(String? data) {
-    String? result;
-
-    if (data != null) {
-      Map<String, dynamic> jsonData = jsonDecode(
-          CryptoUtil(secretKey: 'rahasia', secretIv: 'iv_rahasia')
-              .decryptData(data));
-
-      if (jsonData['ID'] != null) {
-        result = jsonData['ID'].toString();
-      }
     }
 
     return result;
@@ -66,8 +34,11 @@ class ValidateQrCodeDataHelper {
 
     if (data != null) {
       Map<String, dynamic> jsonData = jsonDecode(
-          CryptoUtil(secretKey: 'rahasia', secretIv: 'iv_rahasia')
-              .decryptData(data));
+        CryptoUtil(
+          secretKey: Secret.secretKey,
+          secretIv: Secret.secretIv,
+        ).decryptData(data),
+      );
 
       result = jsonData;
     }
