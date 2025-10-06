@@ -9,19 +9,24 @@ class ValidateQrCodeDataHelper {
     String? result;
 
     if (data != null) {
-      String decodeData = CryptoUtil(
-        secretKey: Secret.secretKey,
-        secretIv: Secret.secretIv,
-      ).decryptData(data);
+      try {
+        String decodeData = CryptoUtil(
+          secretKey: Secret.secretKey,
+          secretIv: Secret.secretIv,
+        ).decryptData(data);
 
-      if (decodeData.isEmpty) {
+        if (decodeData.isEmpty) {
+          result = 'Barcode Data tidak valid!';
+        }
+
+        Map<String, dynamic> jsonData = jsonDecode(decodeData);
+        debugPrint('JSON DATA: $jsonData');
+
+        return result;
+      } catch (e) {
+        debugPrint("VALIDATE ERROR : ");
         return 'Barcode Data tidak valid!';
       }
-
-      Map<String, dynamic> jsonData = jsonDecode(decodeData);
-      debugPrint('JSON DATA: $jsonData');
-
-      return result;
     } else {
       result = 'Barcode Data tidak ditemukan!';
     }
@@ -33,14 +38,19 @@ class ValidateQrCodeDataHelper {
     Map<String, dynamic>? result;
 
     if (data != null) {
-      Map<String, dynamic> jsonData = jsonDecode(
-        CryptoUtil(
-          secretKey: Secret.secretKey,
-          secretIv: Secret.secretIv,
-        ).decryptData(data),
-      );
+      try {
+        Map<String, dynamic> jsonData = jsonDecode(
+          CryptoUtil(
+            secretKey: Secret.secretKey,
+            secretIv: Secret.secretIv,
+          ).decryptData(data),
+        );
 
-      result = jsonData;
+        result = jsonData;
+      } catch (e) {
+        debugPrint("EXTRACT ERROR : ");
+        return result;
+      }
     }
 
     return result;

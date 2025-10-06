@@ -1,4 +1,5 @@
 import 'package:aes_barcode_scanner/src/features/home/presentation/pages/home.page.dart';
+import 'package:change_case/change_case.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:aes_barcode_scanner/src/config/themes/color.theme.dart';
@@ -62,7 +63,10 @@ class _ScannerResultPageState extends ConsumerState<ScannerResultPage> {
       List<Map<String, dynamic>> result = [];
 
       for (var element in barcodeDecode.entries) {
-        result.add({"title": element.key, "value": element.value.toString()});
+        result.add({
+          "title": element.key.toNoCase().toCapitalCase(),
+          "value": element.value.toString().toCapitalCase(),
+        });
       }
 
       setState(() => _resultObject = result);
@@ -85,7 +89,7 @@ class _ScannerResultPageState extends ConsumerState<ScannerResultPage> {
       },
       child: BsScaffoldWidget(
         appBar: BsAppHeaderWidget(
-          title: 'Qr Code Surat Cuti',
+          title: 'Qr Code Result',
           prefixIconAction: () => Navigator.pushNamedAndRemoveUntil(
             context,
             HomePage.routeName,
@@ -116,13 +120,13 @@ class _ScannerResultPageState extends ConsumerState<ScannerResultPage> {
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    spacing: 8,
+                    spacing: 12,
                     children: [
                       Row(
                         children: [
                           Expanded(
                             child: Text(
-                              'Detail Cuti',
+                              'Detail QR Code',
                               style: BsTypographyTheme.bodyMedium(
                                 context,
                                 fontWeight: FontWeight.w600,
@@ -140,17 +144,32 @@ class _ScannerResultPageState extends ConsumerState<ScannerResultPage> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 12),
                       if (_resultObject != null ||
                           (_resultObject ?? []).isNotEmpty)
                         ...List.generate(
                           _resultObject?.length ?? 0,
-                          (index) => Text(
-                            '${_resultObject?[index]['title'] ?? '-'} : ${_resultObject?[index]['value'] ?? '-'}',
-                            style: BsTypographyTheme.bodySmall(
-                              context,
-                              color: BsColorTheme.neutral.shade600,
-                            ),
+                          (index) => Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(
+                                width: 80,
+                                child: Text(
+                                  _resultObject?[index]['title'] ?? '-',
+                                  style: BsTypographyTheme.bodySmall(context),
+                                ),
+                              ),
+                              Text(
+                                ': ',
+                                style: BsTypographyTheme.bodySmall(context),
+                              ),
+                              Expanded(
+                                child: Text(
+                                  _resultObject?[index]['value'] ?? '-',
+                                  style: BsTypographyTheme.bodySmall(context),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                     ],
